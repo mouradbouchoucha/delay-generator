@@ -1,9 +1,8 @@
-import React, { useState } from "react";
+
+import React from "react";
 import * as XLSX from "xlsx";
 
-function CauseRetard() {
-  const [excelFile, setExcelFile] = useState(null);
-
+function CauseRetard({ fetchRetards }) {
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
 
@@ -15,13 +14,17 @@ function CauseRetard() {
         const workbook = XLSX.read(data, { type: "binary" });
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
-        const parseData = XLSX.utils.sheet_to_json(sheet);
-
-        // You can process the data here if needed
-        console.log(parseData);
-
-        // Set the Excel file data in the state
-        setExcelFile(new Blob([data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" }));
+        const parseData = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+        const retards = parseData.map(row=>{
+            console.log(typeof row[10])
+            const value = row[10]
+            return value != undefined && typeof value === "string" ? value : ""
+        }).filter(item=>item.length !=0 ).slice(1)
+        //console.log(parseData)
+        //retards.filter(i=>i.length != 0)
+        console.log(retards)
+        // Notify the parent component (App) with the parsed data
+        fetchRetards(retards);
       };
     }
   };
